@@ -5,10 +5,10 @@
 //  Copyright (c) 2013 Thomas Conner. All rights reserved.
 //
 
-#import "SlidingViewController.h"
+#import "YASlidingViewController.h"
 #import <QuartzCore/QuartzCore.h>
 
-@interface SlidingViewController () <UIGestureRecognizerDelegate>
+@interface YASlidingViewController () <UIGestureRecognizerDelegate>
 @property (nonatomic, strong) UIView *leftUnderlayView;
 @property (nonatomic, strong) UIView *topUnderlayView;
 @property (nonatomic, strong) UIView *topOverlayView;
@@ -19,7 +19,7 @@
 
 @end
 
-@implementation SlidingViewController
+@implementation YASlidingViewController
 @synthesize leftViewController = _leftViewController;
 @synthesize topViewController = _topViewController;
 @synthesize viewState = _viewState;

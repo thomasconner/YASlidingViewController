@@ -15,7 +15,7 @@ enum SlidingViewState : NSInteger {
     SlidingViewStateLocked = 3
 };
 
-@interface SlidingViewController : UIViewController {
+@interface YASlidingViewController : UIViewController {
 @private
     NSMutableArray *_previousViewStates;
 }
