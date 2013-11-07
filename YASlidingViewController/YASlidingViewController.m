@@ -49,7 +49,7 @@
 }
 
 - (void)setDefaults {
-    if (SYSTEM_VERSION_GREATER_THAN_OR_EQUAL_TO(@"7.0")) {
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
         // iOS 7, offset it below the status bar
         self.topViewOffsetY = 20.0f;
     } else {
