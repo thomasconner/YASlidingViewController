@@ -20,16 +20,28 @@
 @end
 
 @implementation YASlidingViewController
-@synthesize leftViewController = _leftViewController;
-@synthesize topViewController = _topViewController;
-@synthesize viewState = _viewState;
-
 @synthesize leftUnderlayView = _leftUnderlayView;
 @synthesize topUnderlayView = _topUnderlayView;
 @synthesize topOverlayView = _topOverlayView;
+@synthesize leftViewController = _leftViewController;
+@synthesize topViewController = _topViewController;
+@synthesize allowOverswipe = _allowOverswipe;
+@synthesize allowNavigationBarOnly = _allowNavigationBarOnly;
+@synthesize topViewOffsetY = _topViewOffsetY;
+@synthesize peakAmount = _peakAmount;
+@synthesize peakThreshold = _peakThreshold;
+@synthesize cornerRadius = _cornerRadius;
+@synthesize shadowOpacity = _shadowOpacity;
+@synthesize shadowOffsetX = _shadowOffsetX;
+@synthesize shadowOffsetY = _shadowOffsetY;
+@synthesize shadowRadius = _shadowRadius;
+@synthesize shadowColor = _shadowColor;
+@synthesize animationDelay = _animationDelay;
+@synthesize animationDuration = _animationDuration;
+@synthesize viewState = _viewState;
 
 #pragma mark -
-#pragma mark Setup and Tear Down
+#pragma mark Setup
 
 - (id)init {
     self = [super init];
@@ -40,6 +52,25 @@
     return self;
 }
 
+- (id)initWithCoder:(NSCoder *)aDecoder {
+    self = [super initWithCoder:aDecoder];
+    if (self) {
+        _viewState = SlidingViewStateClosed;
+        _previousViewStates = [NSMutableArray array];
+    }
+    return self;
+}
+
+- (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
+    self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
+    if (self) {
+        _viewState = SlidingViewStateClosed;
+        _previousViewStates = [NSMutableArray array];
+    }
+    return self;
+}
+
+
 #pragma mark -
 #pragma mark View Lifecycle
 
@@ -49,24 +80,32 @@
 }
 
 - (void)setDefaults {
+    // iOS 7, offset it below the status bar
     if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
-        // iOS 7, offset it below the status bar
         self.topViewOffsetY = 20.0f;
     } else {
         self.topViewOffsetY = 0.0f;
     }
     
     self.allowOverswipe = NO;
-    self.allowNavigationBarOnly = NO;
+    self.allowNavigationBarOnly = YES;
     self.peakAmount = 140.0f;
     self.peakThreshold = 0.5f;
     self.cornerRadius = 4.0f;
-    self.shadowOpacity = 0.3f;
-    self.shadowOffsetX = self.shadowOffsetY = 3.0f;
+    self.shadowOpacity = 0.5f;
+    self.shadowOffsetX = 0.0f;
+    self.shadowOffsetY = 3.0f;
     self.shadowColor = [UIColor blackColor];
     self.shadowRadius = 4.0f;
     self.animationDelay = 0.0f;
-    self.animationDuration = 0.25f;
+    self.animationDuration = 0.2f;
+}
+
+- (void)viewDidAppear:(BOOL)animated {
+    [super viewDidAppear:animated];
+    
+    // Hide the left
+    [self hideLeftAnimated:NO];
 }
 
 #pragma mark -
@@ -81,16 +120,7 @@
     // Create the left underlay view
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.frame.size.width, self.view.frame.size.height)];
     view.backgroundColor = [UIColor clearColor];
-    view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleHeight;
-    view.layer.masksToBounds = NO;
-    view.layer.shadowColor = self.shadowColor.CGColor;
-    view.layer.shadowOffset = CGSizeMake(self.shadowOffsetX, self.shadowOffsetY);
-    view.layer.shadowRadius = self.shadowRadius;
-    view.layer.shadowOpacity = self.shadowOpacity;
-    UIBezierPath *menuUnderlayViewPath = [UIBezierPath bezierPathWithRect:view.bounds];
-    view.layer.shadowPath = menuUnderlayViewPath.CGPath;
-    view.layer.shouldRasterize = YES;
-    view.layer.rasterizationScale = [UIScreen mainScreen].scale;
+    view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     // Set the left underlay view
     self.leftUnderlayView = view;
@@ -155,6 +185,7 @@
     // Create the view
     UIView *view = [[UIView alloc] initWithFrame:frame];
     view.backgroundColor = [UIColor clearColor];
+    view.autoresizingMask = self.topViewController.view.autoresizingMask;
     
     // Set the view
     self.topOverlayView = view;
@@ -202,55 +233,15 @@
 }
 
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
-    // Adjust top view controller, underlay, and overlay view
-    // Adjust left view controller and underlay view
+    [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
-    // Account for ipad to show left view controller
-    
-    CGRect contentRect = self.view.bounds;
-    
-    // If the device is a pad and the orientation is landscape
-    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPad && UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
-        // Adjust the top underlay view frame
-        CGRect topUnderlayViewFrame = CGRectMake(self.peakAmount, 0.0f, contentRect.size.width - self.peakAmount, contentRect.size.height);
-        self.topUnderlayView.frame = CGRectIntegral(topUnderlayViewFrame);
-        
-        // Update the view state
-        [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
-        _viewState = SlidingViewStateLocked;
-        
-        // Remove the top overlay view
-        if (self.topOverlayView) {
-            [self.topOverlayView removeFromSuperview];
-            self.topOverlayView = nil;
-        }
+    // If the view state is openeed
+    if (self.viewState == SlidingViewStateOpened) {
+        [self showLeftAnimated:NO];
     }
     else {
-        // Adjust the top underlay view frame
-        CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, self.view.bounds.size.width, self.view.bounds.size.height - self.topViewOffsetY);
-        self.topUnderlayView.frame = CGRectIntegral(rect);
-        
-        // If the view state is locked and we have a previous view state
-        if (self.viewState == SlidingViewStateLocked && _previousViewStates.count > 0) {
-            NSNumber *prevViewState = [_previousViewStates objectAtIndex:_previousViewStates.count - 1];
-            _viewState = prevViewState.intValue;
-            [_previousViewStates removeLastObject];
-        }
-        
-        // If the view state is openeed
-        if (self.viewState == SlidingViewStateOpened) {
-            self.topUnderlayView.frame = CGRectOffset(contentRect, self.peakAmount, 0.0f);
-            
-            // Create the top overlay view
-            [self createTopOverlayView];
-        }
+        [self hideLeftAnimated:NO];
     }
-    
-    // Adjust the shadows
-    UIBezierPath *leftUnderlayViewPath = [UIBezierPath bezierPathWithRoundedRect:self.leftUnderlayView.bounds cornerRadius:self.cornerRadius];
-    self.leftUnderlayView.layer.shadowPath = leftUnderlayViewPath.CGPath;
-    UIBezierPath *topUnderlayViewPath = [UIBezierPath bezierPathWithRoundedRect:self.topUnderlayView.bounds cornerRadius:self.cornerRadius];
-    self.topUnderlayView.layer.shadowPath = topUnderlayViewPath.CGPath;
 }
 
 #pragma mark -
@@ -280,6 +271,7 @@
     
     // Adjust the frame
     leftViewController.view.frame = CGRectIntegral(self.leftUnderlayView.bounds);
+    leftViewController.view.autoresizingMask = self.leftUnderlayView.autoresizingMask;
 }
 
 - (void)setTopViewController:(UIViewController *)topViewController {
@@ -299,13 +291,13 @@
     [self addChildViewController:topViewController];
     [topViewController didMoveToParentViewController:self];
     
-    // Added a corner radius
-    topViewController.view.autoresizingMask = self.topUnderlayView.autoresizingMask;
+    // Add a corner radius
     topViewController.view.layer.masksToBounds = YES;
     topViewController.view.layer.cornerRadius = self.cornerRadius;
     
     // Adjust the frame
     topViewController.view.frame = CGRectIntegral(self.topUnderlayView.bounds);
+    topViewController.view.autoresizingMask = self.topUnderlayView.autoresizingMask;
 }
 
 #pragma mark -
@@ -426,11 +418,21 @@
         
         CGPoint startingPoint = [gestureRecognizer locationInView:self.view];
         
-        // we only trigger a swipe if either navigationBarOnly is deactivated
-        // or we swiped in the navigationBar
-        if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
-            [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
-            _viewState = SlidingViewStateDragging;
+        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+            // we only trigger a swipe if either navigationBarOnly is deactivated
+            // or we swiped in the navigationBar
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 64.0f) {
+                [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
+                _viewState = SlidingViewStateDragging;
+            }
+        }
+        else {
+            // we only trigger a swipe if either navigationBarOnly is deactivated
+            // or we swiped in the navigationBar
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
+                [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
+                _viewState = SlidingViewStateDragging;
+            }
         }
     }
     else if (gestureRecognizer.state == UIGestureRecognizerStateChanged && self.viewState == SlidingViewStateDragging) {
@@ -484,10 +486,19 @@
 - (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)panGestureRecognizer {
     CGPoint startingPoint = [panGestureRecognizer locationInView:self.view];
     
-    // we only trigger a swipe if either navigationBarOnly is deactivated
-    // or we swiped in the navigationBar
-    if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
-        return YES;
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        // we only trigger a swipe if either navigationBarOnly is deactivated
+        // or we swiped in the navigationBar
+        if (!self.allowNavigationBarOnly || startingPoint.y <= 64.0f) {
+            return YES;
+        }
+    }
+    else {
+        // we only trigger a swipe if either navigationBarOnly is deactivated
+        // or we swiped in the navigationBar
+        if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
+            return YES;
+        }
     }
     
     return NO;
