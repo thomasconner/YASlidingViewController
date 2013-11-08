@@ -22,6 +22,8 @@
 		E98C6F80182BF6C70003D22F /* UIViewController+SlidingView.m in Sources */ = {isa = PBXBuildFile; fileRef = E98C6F7D182BF6C70003D22F /* UIViewController+SlidingView.m */; };
 		E98C6F81182BF6C70003D22F /* YASlidingViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E98C6F7F182BF6C70003D22F /* YASlidingViewController.m */; };
 		E9EB71EA182D0BC900985C88 /* QuartzCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E9EB71E9182D0BC900985C88 /* QuartzCore.framework */; };
+		E9EB71ED182D184100985C88 /* TopViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EB71EC182D184100985C88 /* TopViewController.m */; };
+		E9EB71F0182D185400985C88 /* LeftViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9EB71EF182D185400985C88 /* LeftViewController.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -56,6 +58,10 @@
 		E98C6F7E182BF6C70003D22F /* YASlidingViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YASlidingViewController.h; sourceTree = "<group>"; };
 		E98C6F7F182BF6C70003D22F /* YASlidingViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YASlidingViewController.m; sourceTree = "<group>"; };
 		E9EB71E9182D0BC900985C88 /* QuartzCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = QuartzCore.framework; path = System/Library/Frameworks/QuartzCore.framework; sourceTree = SDKROOT; };
+		E9EB71EB182D184100985C88 /* TopViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TopViewController.h; sourceTree = "<group>"; };
+		E9EB71EC182D184100985C88 /* TopViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TopViewController.m; sourceTree = "<group>"; };
+		E9EB71EE182D185400985C88 /* LeftViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LeftViewController.h; sourceTree = "<group>"; };
+		E9EB71EF182D185400985C88 /* LeftViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LeftViewController.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -118,10 +124,14 @@
 		E98C6F47182BF2F40003D22F /* YASlidingViewControllerDemo */ = {
 			isa = PBXGroup;
 			children = (
-				E98C6F50182BF2F40003D22F /* AppDelegate.h */,
-				E98C6F51182BF2F40003D22F /* AppDelegate.m */,
 				E98C6F53182BF2F40003D22F /* Images.xcassets */,
 				E98C6F48182BF2F40003D22F /* Supporting Files */,
+				E98C6F50182BF2F40003D22F /* AppDelegate.h */,
+				E98C6F51182BF2F40003D22F /* AppDelegate.m */,
+				E9EB71EB182D184100985C88 /* TopViewController.h */,
+				E9EB71EC182D184100985C88 /* TopViewController.m */,
+				E9EB71EE182D185400985C88 /* LeftViewController.h */,
+				E9EB71EF182D185400985C88 /* LeftViewController.m */,
 			);
 			path = YASlidingViewControllerDemo;
 			sourceTree = "<group>";
@@ -262,8 +272,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9EB71ED182D184100985C88 /* TopViewController.m in Sources */,
 				E98C6F52182BF2F40003D22F /* AppDelegate.m in Sources */,
 				E98C6F4E182BF2F40003D22F /* main.m in Sources */,
+				E9EB71F0182D185400985C88 /* LeftViewController.m in Sources */,
 				E98C6F80182BF6C70003D22F /* UIViewController+SlidingView.m in Sources */,
 				E98C6F81182BF6C70003D22F /* YASlidingViewController.m in Sources */,
 			);

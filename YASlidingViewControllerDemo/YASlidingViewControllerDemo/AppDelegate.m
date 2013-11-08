@@ -8,6 +8,8 @@
 
 #import "AppDelegate.h"
 #import "YASlidingViewController.h"
+#import "TopViewController.h"
+#import "LeftViewController.h"
 
 @implementation AppDelegate
 
@@ -15,11 +17,19 @@
     self.window = [[UIWindow alloc] initWithFrame:[[UIScreen mainScreen] bounds]];
     
     YASlidingViewController *slidingViewController = [YASlidingViewController new];
-    slidingViewController.leftViewController = [UIViewController new];
-    slidingViewController.leftViewController.view.backgroundColor = [UIColor greenColor];
-    slidingViewController.topViewController = [UIViewController new];
-    slidingViewController.topViewController.view.backgroundColor = [UIColor redColor];
+    slidingViewController.peakAmount = 250.0f;
+    slidingViewController.leftViewController = [LeftViewController new];
+    TopViewController *topViewController = [[TopViewController alloc] initWithStyle:UITableViewStylePlain];
+    slidingViewController.topViewController = [[UINavigationController alloc] initWithRootViewController:topViewController];
     self.window.rootViewController = slidingViewController;
+    
+    double delayInSeconds = 2.0;
+    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
+    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+        slidingViewController.peakAmount = 200.0f;
+    });
+    
+    [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     
     self.window.backgroundColor = [UIColor whiteColor];
     [self.window makeKeyAndVisible];

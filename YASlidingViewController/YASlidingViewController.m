@@ -14,8 +14,10 @@
 @property (nonatomic, strong) UIView *topOverlayView;
 
 - (void)setDefaults;
-- (void)createTopOverlayView;
+- (void)removeLeftUnderlayView;
+- (void)removeTopUnderlayView;
 - (void)removeTopOverlayView;
+- (void)updateViewsAnimated:(BOOL)animated;
 
 @end
 
@@ -46,8 +48,7 @@
 - (id)init {
     self = [super init];
     if (self) {
-        _viewState = SlidingViewStateClosed;
-        _previousViewStates = [NSMutableArray array];
+        [self setDefaults];
     }
     return self;
 }
@@ -55,8 +56,7 @@
 - (id)initWithCoder:(NSCoder *)aDecoder {
     self = [super initWithCoder:aDecoder];
     if (self) {
-        _viewState = SlidingViewStateClosed;
-        _previousViewStates = [NSMutableArray array];
+        [self setDefaults];
     }
     return self;
 }
@@ -64,48 +64,69 @@
 - (id)initWithNibName:(NSString *)nibNameOrNil bundle:(NSBundle *)nibBundleOrNil {
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-        _viewState = SlidingViewStateClosed;
-        _previousViewStates = [NSMutableArray array];
+        [self setDefaults];
     }
     return self;
 }
 
+- (void)setDefaults {
+    _viewState = SlidingViewStateClosed;
+    _previousViewStates = [NSMutableArray array];
+    
+    // iOS 7, offset it below the status bar
+    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        _topViewOffsetY = 20.0f;
+    } else {
+        _topViewOffsetY = 0.0f;
+    }
+    
+    _allowOverswipe = NO;
+    _allowNavigationBarOnly = NO;
+    _peakAmount = 140.0f;
+    _peakThreshold = 0.5f;
+    _cornerRadius = 4.0f;
+    _shadowOpacity = 0.5f;
+    _shadowOffsetX = 0.0f;
+    _shadowOffsetY = 3.0f;
+    _shadowColor = [UIColor blackColor];
+    _shadowRadius = 4.0f;
+    _animationDelay = 0.0f;
+    _animationDuration = 0.2f;
+}
 
 #pragma mark -
 #pragma mark View Lifecycle
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    [self setDefaults];
-}
-
-- (void)setDefaults {
-    // iOS 7, offset it below the status bar
-    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
-        self.topViewOffsetY = 20.0f;
-    } else {
-        self.topViewOffsetY = 0.0f;
-    }
-    
-    self.allowOverswipe = NO;
-    self.allowNavigationBarOnly = NO;
-    self.peakAmount = 140.0f;
-    self.peakThreshold = 0.5f;
-    self.cornerRadius = 4.0f;
-    self.shadowOpacity = 0.5f;
-    self.shadowOffsetX = 0.0f;
-    self.shadowOffsetY = 3.0f;
-    self.shadowColor = [UIColor blackColor];
-    self.shadowRadius = 4.0f;
-    self.animationDelay = 0.0f;
-    self.animationDuration = 0.2f;
 }
 
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
     
-    // Hide the left
-    [self hideLeftAnimated:NO];
+    // Update _viewAppeared flag
+    _viewAppeared = YES;
+    
+    // Update the views
+    [self updateViewsAnimated:_viewAppeared];
+}
+
+- (void)viewDidDisappear:(BOOL)animated {
+    [super viewDidDisappear:animated];
+    
+    // Update _viewAppeared flag
+    _viewAppeared = NO;
+}
+
+#pragma mark -
+#pragma mark Properties
+
+- (void)setPeakAmount:(CGFloat)peakAmount {
+    // Set the peak amount
+    _peakAmount = peakAmount;
+    
+    // Update the views
+    [self updateViewsAnimated:_viewAppeared];
 }
 
 #pragma mark -
@@ -118,19 +139,22 @@
     }
     
     // Create the left underlay view
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, self.view.frame.size.width, self.view.frame.size.height)];
-    view.backgroundColor = [UIColor clearColor];
+    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds))];
+    view.backgroundColor = self.leftViewController.view.backgroundColor;
     view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     // Set the left underlay view
     self.leftUnderlayView = view;
     
-    // Add the left underlay view to the view
-    [self.view addSubview:view];
-    [self.view sendSubviewToBack:view];
-    
     // Return the view
     return view;
+}
+
+- (void)removeLeftUnderlayView {
+    if (self.leftUnderlayView) {
+        [self.leftUnderlayView removeFromSuperview];
+        self.leftUnderlayView = nil;
+    }
 }
 
 - (UIView *)topUnderlayView {
@@ -156,10 +180,6 @@
     // Set the top underlay view
     self.topUnderlayView = view;
     
-    // Add the top underlay view to the view
-    [self.view addSubview:view];
-    [self.view bringSubviewToFront:view];
-    
     // Add the pan gesture recognizer
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
     panGestureRecognizer.cancelsTouchesInView = NO;
@@ -168,6 +188,13 @@
     
     // Return the view
     return view;
+}
+
+- (void)removeTopUnderlayView {
+    if (self.topUnderlayView) {
+        [self.topUnderlayView removeFromSuperview];
+        self.topUnderlayView = nil;
+    }
 }
 
 - (UIView *)topOverlayView {
@@ -184,10 +211,6 @@
     // Set the view
     self.topOverlayView = view;
     
-    // Add the top overlay view to the view
-    [self.topViewController.view addSubview:view];
-    [self.topViewController.view bringSubviewToFront:view];
-    
     // Add tap gesture recognizer
     UITapGestureRecognizer *tapGestureRecognizer = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(tappedTopOverlayView)];
     [view addGestureRecognizer:tapGestureRecognizer];
@@ -196,18 +219,28 @@
     return view;
 }
 
-- (void)createTopOverlayView {
-    // Remove the overlay view
-    [self removeTopOverlayView];
-    
-    // Just call the getter to create the overlay view
-    __unused UIView *view = self.topOverlayView;
+- (void)removeTopOverlayView {
+    if (self.topOverlayView) {
+        [self.topOverlayView removeFromSuperview];
+        self.topOverlayView = nil;
+    }
 }
 
-- (void)removeTopOverlayView {
-    if (_topOverlayView) {
-        [_topOverlayView removeFromSuperview];
-        _topOverlayView = nil;
+- (void)updateViewsAnimated:(BOOL)animated {
+    // Adjust the left and right view controller frame
+    [self removeLeftUnderlayView];
+    [self.leftUnderlayView addSubview:self.leftViewController.view];
+    [self.view addSubview:self.leftUnderlayView];
+    [self.view sendSubviewToBack:self.leftUnderlayView];
+    CGRect leftViewControllerFrame = CGRectMake(0.0f, self.topViewOffsetY, self.peakAmount, CGRectGetHeight(self.leftUnderlayView.bounds) - self.topViewOffsetY);
+    self.leftViewController.view.frame = CGRectIntegral(leftViewControllerFrame);
+    
+    // If the view state is openeed
+    if (self.viewState == SlidingViewStateOpened) {
+        [self showLeftAnimated:_viewAppeared];
+    }
+    else {
+        [self hideLeftAnimated:_viewAppeared];
     }
 }
 
@@ -229,13 +262,8 @@
 - (void)willAnimateRotationToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation duration:(NSTimeInterval)duration {
     [super willAnimateRotationToInterfaceOrientation:toInterfaceOrientation duration:duration];
     
-    // If the view state is openeed
-    if (self.viewState == SlidingViewStateOpened) {
-        [self showLeftAnimated:NO];
-    }
-    else {
-        [self hideLeftAnimated:NO];
-    }
+    // Update the views
+    [self updateViewsAnimated:_viewAppeared];
 }
 
 #pragma mark -
@@ -260,12 +288,15 @@
     [leftViewController removeFromParentViewController];
     _leftViewController = leftViewController;
     [self.leftUnderlayView addSubview:leftViewController.view];
+    [self.view addSubview:self.leftUnderlayView];
+    [self.view sendSubviewToBack:self.leftUnderlayView];
     [self addChildViewController:leftViewController];
     [leftViewController didMoveToParentViewController:self];
     
     // Adjust the frame
-    leftViewController.view.frame = CGRectIntegral(self.leftUnderlayView.bounds);
-    leftViewController.view.autoresizingMask = self.leftUnderlayView.autoresizingMask;
+    CGRect frame = CGRectMake(0.0f, self.topViewOffsetY, self.peakAmount, CGRectGetHeight(self.leftUnderlayView.bounds) - self.topViewOffsetY);
+    leftViewController.view.frame = CGRectIntegral(frame);
+    leftViewController.view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleHeight;
 }
 
 - (void)setTopViewController:(UIViewController *)topViewController {
@@ -282,6 +313,8 @@
     [topViewController removeFromParentViewController];
     _topViewController = topViewController;
     [self.topUnderlayView addSubview:topViewController.view];
+    [self.view addSubview:self.topUnderlayView];
+    [self.view bringSubviewToFront:self.topUnderlayView];
     [self addChildViewController:topViewController];
     [topViewController didMoveToParentViewController:self];
     
@@ -317,7 +350,7 @@
     }
     
     // Get the rect
-    CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, self.view.bounds.size.width, self.view.bounds.size.height - self.topViewOffsetY);
+    CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds) - self.topViewOffsetY);
     
     // Dismiss the keyboard if it is showing
     [self.topViewController.view endEditing:YES];
@@ -328,7 +361,7 @@
                             options:UIViewAnimationOptionCurveEaseInOut  | UIViewAnimationOptionBeginFromCurrentState
                          animations:^{
                              // Adjust the top underlay view frame
-                             self.topUnderlayView.frame = CGRectOffset(rect, self.peakAmount, 0.0f);
+                             self.topUnderlayView.frame = CGRectIntegral(CGRectOffset(rect, self.peakAmount, 0.0f));
                          }
                          completion:^(BOOL finished) {
                              if (finished) {
@@ -336,21 +369,29 @@
                                  [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
                                  _viewState = SlidingViewStateOpened;
                                  
-                                 // Create the top overlay view
-                                 [self createTopOverlayView];
+                                 // Remove the overlay view
+                                 [self removeTopOverlayView];
+                                 
+                                 // Add the top overlay view to the view
+                                 [self.topViewController.view addSubview:self.topOverlayView];
+                                 [self.topViewController.view bringSubviewToFront:self.topOverlayView];
                              }
                          }];
     }
     else {
         // Adjust the top underlay view frame
-        self.topUnderlayView.frame = CGRectOffset(rect, self.peakAmount, 0.0f);
+        self.topUnderlayView.frame = CGRectIntegral(CGRectOffset(rect, self.peakAmount, 0.0f));
         
         // Update the view state
         [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
         _viewState = SlidingViewStateOpened;
 
-        // Create the top overlay view
-        [self createTopOverlayView];
+        // Remove the overlay view
+        [self removeTopOverlayView];
+        
+        // Add the top overlay view to the view
+        [self.topViewController.view addSubview:self.topOverlayView];
+        [self.topViewController.view bringSubviewToFront:self.topOverlayView];
     }
 }
 
@@ -361,7 +402,7 @@
     }
     
     // Get the rect
-    CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, self.view.bounds.size.width, self.view.bounds.size.height - self.topViewOffsetY);
+    CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds) - self.topViewOffsetY);
     
     if (animated) {
         [UIView animateWithDuration:self.animationDuration
@@ -460,7 +501,7 @@
                              gestureRecognizer.view.center = CGPointMake(gestureRecognizer.view.center.x + translation.x, gestureRecognizer.view.center.y);
                              
                              // Get the rect
-                             CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, self.view.bounds.size.width, self.view.bounds.size.height - self.topViewOffsetY);
+                             CGRect rect = CGRectMake(0.0f, self.topViewOffsetY, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds) - self.topViewOffsetY);
                              
                              // Adjust the view
                              if (gestureRecognizer.view.frame.origin.x > self.peakAmount) {
@@ -479,7 +520,7 @@
         
         // If the swipe was to the right
         if (velocity.x > 0) {
-            if (self.topUnderlayView.frame.origin.x <= 100.0f) {
+            if (self.topUnderlayView.frame.origin.x <= self.peakThreshold) {
                 [self hideLeftAnimated:YES];
             }
             else {
@@ -488,7 +529,7 @@
         }
         // else is must have been to the left
         else {
-            if (self.topUnderlayView.frame.origin.x >= 100.0f) {
+            if (self.topUnderlayView.frame.origin.x >= self.peakThreshold) {
                 [self showLeftAnimated:YES];
             } else {
                 [self hideLeftAnimated:YES];

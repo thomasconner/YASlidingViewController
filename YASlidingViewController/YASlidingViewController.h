@@ -18,6 +18,7 @@ enum SlidingViewState : NSInteger {
 @interface YASlidingViewController : UIViewController {
 @private
     NSMutableArray *_previousViewStates;
+    BOOL _viewAppeared;
 }
 
 // View Controllers
