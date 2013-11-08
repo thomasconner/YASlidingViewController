@@ -88,7 +88,7 @@
     }
     
     self.allowOverswipe = NO;
-    self.allowNavigationBarOnly = YES;
+    self.allowNavigationBarOnly = NO;
     self.peakAmount = 140.0f;
     self.peakThreshold = 0.5f;
     self.cornerRadius = 4.0f;
@@ -176,14 +176,8 @@
         return _topOverlayView;
     }
     
-    // Adjust the frame for the navigation bar
-    CGRect frame = self.topViewController.view.bounds;
-    CGFloat navigationBarHeight = (UIInterfaceOrientationIsLandscape(self.interfaceOrientation) && [UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone) ? 32.0f : 44.0f;
-    frame.size.height -= navigationBarHeight;
-    frame.origin.y += navigationBarHeight;
-    
     // Create the view
-    UIView *view = [[UIView alloc] initWithFrame:frame];
+    UIView *view = [[UIView alloc] initWithFrame:self.topViewController.view.bounds];
     view.backgroundColor = [UIColor clearColor];
     view.autoresizingMask = self.topViewController.view.autoresizingMask;
     
@@ -418,10 +412,10 @@
         
         CGPoint startingPoint = [gestureRecognizer locationInView:self.view];
         
-        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+        if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone && UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
             // we only trigger a swipe if either navigationBarOnly is deactivated
             // or we swiped in the navigationBar
-            if (!self.allowNavigationBarOnly || startingPoint.y <= 64.0f) {
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 32.0f) {
                 [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
                 _viewState = SlidingViewStateDragging;
             }
@@ -486,10 +480,10 @@
 - (BOOL)gestureRecognizerShouldBegin:(UIPanGestureRecognizer *)panGestureRecognizer {
     CGPoint startingPoint = [panGestureRecognizer locationInView:self.view];
     
-    if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+    if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone && UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
         // we only trigger a swipe if either navigationBarOnly is deactivated
         // or we swiped in the navigationBar
-        if (!self.allowNavigationBarOnly || startingPoint.y <= 64.0f) {
+        if (!self.allowNavigationBarOnly || startingPoint.y <= 32.0f) {
             return YES;
         }
     }
