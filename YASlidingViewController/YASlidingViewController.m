@@ -413,19 +413,39 @@
         CGPoint startingPoint = [gestureRecognizer locationInView:self.view];
         
         if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone && UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
-            // we only trigger a swipe if either navigationBarOnly is deactivated
-            // or we swiped in the navigationBar
-            if (!self.allowNavigationBarOnly || startingPoint.y <= 32.0f) {
-                [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
-                _viewState = SlidingViewStateDragging;
+            if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+                // we only trigger a swipe if either navigationBarOnly is deactivated
+                // or we swiped in the navigationBar
+                if (!self.allowNavigationBarOnly || startingPoint.y <= 52.0f) {
+                    [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
+                    _viewState = SlidingViewStateDragging;
+                }
+            }
+            else {
+                // we only trigger a swipe if either navigationBarOnly is deactivated
+                // or we swiped in the navigationBar
+                if (!self.allowNavigationBarOnly || startingPoint.y <= 32.0f) {
+                    [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
+                    _viewState = SlidingViewStateDragging;
+                }
             }
         }
         else {
-            // we only trigger a swipe if either navigationBarOnly is deactivated
-            // or we swiped in the navigationBar
-            if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
-                [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
-                _viewState = SlidingViewStateDragging;
+            if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+                // we only trigger a swipe if either navigationBarOnly is deactivated
+                // or we swiped in the navigationBar
+                if (!self.allowNavigationBarOnly || startingPoint.y <= 64.0f) {
+                    [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
+                    _viewState = SlidingViewStateDragging;
+                }
+            }
+            else {
+                // we only trigger a swipe if either navigationBarOnly is deactivated
+                // or we swiped in the navigationBar
+                if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
+                    [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
+                    _viewState = SlidingViewStateDragging;
+                }
             }
         }
     }
@@ -481,17 +501,35 @@
     CGPoint startingPoint = [panGestureRecognizer locationInView:self.view];
     
     if ([UIDevice currentDevice].userInterfaceIdiom == UIUserInterfaceIdiomPhone && UIInterfaceOrientationIsLandscape(self.interfaceOrientation)) {
-        // we only trigger a swipe if either navigationBarOnly is deactivated
-        // or we swiped in the navigationBar
-        if (!self.allowNavigationBarOnly || startingPoint.y <= 32.0f) {
-            return YES;
+        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+            // we only trigger a swipe if either navigationBarOnly is deactivated
+            // or we swiped in the navigationBar
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 52.0f) {
+                return YES;
+            }
+        }
+        else {
+            // we only trigger a swipe if either navigationBarOnly is deactivated
+            // or we swiped in the navigationBar
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 32.0f) {
+                return YES;
+            }
         }
     }
     else {
-        // we only trigger a swipe if either navigationBarOnly is deactivated
-        // or we swiped in the navigationBar
-        if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
-            return YES;
+        if (NSFoundationVersionNumber > NSFoundationVersionNumber_iOS_6_1) {
+            // we only trigger a swipe if either navigationBarOnly is deactivated
+            // or we swiped in the navigationBar
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 64.0f) {
+                return YES;
+            }
+        }
+        else {
+            // we only trigger a swipe if either navigationBarOnly is deactivated
+            // or we swiped in the navigationBar
+            if (!self.allowNavigationBarOnly || startingPoint.y <= 44.0f) {
+                return YES;
+            }
         }
     }
     
