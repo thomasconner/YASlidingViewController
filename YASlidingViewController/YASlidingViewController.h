@@ -6,6 +6,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import "UIViewController+SlidingView.h"
 
 typedef enum SlidingViewState : NSInteger SlidingViewState;
 enum SlidingViewState : NSInteger {
