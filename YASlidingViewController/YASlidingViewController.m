@@ -318,7 +318,6 @@
     [topViewController.view removeFromSuperview];
     [topViewController willMoveToParentViewController:nil];
     [topViewController removeFromParentViewController];
-    [self removeTopBackgroundView];
     _topViewController = topViewController;
     [self.topBackgroundView addSubview:topViewController.view];
     [self.view addSubview:self.topBackgroundView];
