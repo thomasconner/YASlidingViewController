@@ -38,6 +38,7 @@ enum SlidingViewState : NSInteger {
 @property (nonatomic) CGFloat shadowOffsetY;
 @property (nonatomic) CGFloat shadowRadius;
 @property (nonatomic, strong) UIColor *shadowColor;
+@property (nonatomic, strong) UIColor *statusBarColor;
 @property (nonatomic) CGFloat animationDelay;
 @property (nonatomic) CGFloat animationDuration;
 @property (nonatomic, readonly) SlidingViewState viewState;

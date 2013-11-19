@@ -9,21 +9,21 @@
 #import <QuartzCore/QuartzCore.h>
 
 @interface YASlidingViewController () <UIGestureRecognizerDelegate>
-@property (nonatomic, strong) UIView *leftUnderlayView;
-@property (nonatomic, strong) UIView *topUnderlayView;
+@property (nonatomic, strong) UIView *backgroundView;
+@property (nonatomic, strong) UIView *topBackgroundView;
 @property (nonatomic, strong) UIView *topOverlayView;
 
 - (void)setDefaults;
-- (void)removeLeftUnderlayView;
-- (void)removeTopUnderlayView;
+- (void)removeBackgroundView;
+- (void)removeTopBackgroundView;
 - (void)removeTopOverlayView;
 - (void)updateViewsAnimated:(BOOL)animated;
 
 @end
 
 @implementation YASlidingViewController
-@synthesize leftUnderlayView = _leftUnderlayView;
-@synthesize topUnderlayView = _topUnderlayView;
+@synthesize backgroundView = _backgroundView;
+@synthesize topBackgroundView = _topBackgroundView;
 @synthesize topOverlayView = _topOverlayView;
 @synthesize leftViewController = _leftViewController;
 @synthesize topViewController = _topViewController;
@@ -38,6 +38,7 @@
 @synthesize shadowOffsetY = _shadowOffsetY;
 @synthesize shadowRadius = _shadowRadius;
 @synthesize shadowColor = _shadowColor;
+@synthesize statusBarColor = _statusBarColor;
 @synthesize animationDelay = _animationDelay;
 @synthesize animationDuration = _animationDuration;
 @synthesize viewState = _viewState;
@@ -84,12 +85,13 @@
     _allowNavigationBarOnly = NO;
     _peakAmount = 140.0f;
     _peakThreshold = 0.5f;
-    _cornerRadius = 4.0f;
+    _cornerRadius = 0.0f;
     _shadowOpacity = 0.5f;
     _shadowOffsetX = 0.0f;
-    _shadowOffsetY = 3.0f;
+    _shadowOffsetY = -3.0f;
     _shadowColor = [UIColor blackColor];
-    _shadowRadius = 4.0f;
+    _statusBarColor = [UIColor blackColor];
+    _shadowRadius = 5.0f;
     _animationDelay = 0.0f;
     _animationDuration = 0.2f;
 }
@@ -99,6 +101,17 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    
+    // Add the background view
+    [self.view addSubview:self.backgroundView];
+    [self.view sendSubviewToBack:self.backgroundView];
+}
+
+- (void)viewWillAppear:(BOOL)animated {
+    [super viewWillAppear:animated];
+    
+    // Update the views
+    [self updateViewsAnimated:animated];
 }
 
 - (void)viewDidAppear:(BOOL)animated {
@@ -106,9 +119,6 @@
     
     // Update _viewAppeared flag
     _viewAppeared = YES;
-    
-    // Update the views
-    [self updateViewsAnimated:_viewAppeared];
 }
 
 - (void)viewDidDisappear:(BOOL)animated {
@@ -132,39 +142,40 @@
 #pragma mark -
 #pragma mark Views
 
-- (UIView *)leftUnderlayView {
-    // Return the left underlay view if we have already created it
-    if (_leftUnderlayView) {
-        return _leftUnderlayView;
+- (UIView *)backgroundView {
+    // Return the background view if we have already created it
+    if (_backgroundView) {
+        return _backgroundView;
     }
     
     // Create the left underlay view
     UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds))];
-    view.backgroundColor = self.leftViewController.view.backgroundColor;
+    view.backgroundColor = self.statusBarColor;
     view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
-    // Set the left underlay view
-    self.leftUnderlayView = view;
+    // Set the background view
+    self.backgroundView = view;
     
     // Return the view
     return view;
 }
 
-- (void)removeLeftUnderlayView {
-    if (self.leftUnderlayView) {
-        [self.leftUnderlayView removeFromSuperview];
-        self.leftUnderlayView = nil;
+- (void)removeBackgroundView {
+    if (self.backgroundView) {
+        [self.backgroundView removeFromSuperview];
+        self.backgroundView = nil;
     }
 }
 
-- (UIView *)topUnderlayView {
-    // Return the top underlay view if we have already created it
-    if (_topUnderlayView) {
-        return _topUnderlayView;
+- (UIView *)topBackgroundView {
+    // Return the top background view if we have already created it
+    if (_topBackgroundView) {
+        return _topBackgroundView;
     }
     
     // Create the top underlay view
-    UIView *view = [[UIView alloc] initWithFrame:CGRectMake(0.0f, self.topViewOffsetY, self.view.frame.size.width, self.view.frame.size.height - self.topViewOffsetY)];
+    CGRect frame = CGRectMake(0.0f, self.topViewOffsetY, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds) - self.topViewOffsetY);
+    UIView *view = [[UIView alloc] initWithFrame:frame];
     view.backgroundColor = [UIColor clearColor];
     view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleLeftMargin | UIViewAutoresizingFlexibleRightMargin | UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     view.layer.masksToBounds = NO;
@@ -177,8 +188,8 @@
     view.layer.shouldRasterize = YES;
     view.layer.rasterizationScale = [UIScreen mainScreen].scale;
     
-    // Set the top underlay view
-    self.topUnderlayView = view;
+    // Set the top background view
+    self.topBackgroundView = view;
     
     // Add the pan gesture recognizer
     UIPanGestureRecognizer *panGestureRecognizer = [[UIPanGestureRecognizer alloc] initWithTarget:self action:@selector(handleSwipe:)];
@@ -190,10 +201,10 @@
     return view;
 }
 
-- (void)removeTopUnderlayView {
-    if (self.topUnderlayView) {
-        [self.topUnderlayView removeFromSuperview];
-        self.topUnderlayView = nil;
+- (void)removeTopBackgroundView {
+    if (self.topBackgroundView) {
+        [self.topBackgroundView removeFromSuperview];
+        self.topBackgroundView = nil;
     }
 }
 
@@ -228,19 +239,17 @@
 
 - (void)updateViewsAnimated:(BOOL)animated {
     // Adjust the left and right view controller frame
-    [self removeLeftUnderlayView];
-    [self.leftUnderlayView addSubview:self.leftViewController.view];
-    [self.view addSubview:self.leftUnderlayView];
-    [self.view sendSubviewToBack:self.leftUnderlayView];
-    CGRect leftViewControllerFrame = CGRectMake(0.0f, self.topViewOffsetY, self.peakAmount, CGRectGetHeight(self.leftUnderlayView.bounds) - self.topViewOffsetY);
+    CGRect backgroundViewFrame = CGRectMake(0.0f, 0.0f, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.view.bounds));
+    self.backgroundView.frame = CGRectIntegral(backgroundViewFrame);
+    CGRect leftViewControllerFrame = CGRectMake(0.0f, self.topViewOffsetY, self.peakAmount, CGRectGetHeight(self.backgroundView.bounds) - self.topViewOffsetY);
     self.leftViewController.view.frame = CGRectIntegral(leftViewControllerFrame);
     
     // If the view state is openeed
     if (self.viewState == SlidingViewStateOpened) {
-        [self showLeftAnimated:_viewAppeared];
+        [self showLeftAnimated:animated];
     }
     else {
-        [self hideLeftAnimated:_viewAppeared];
+        [self hideLeftAnimated:animated];
     }
 }
 
@@ -287,14 +296,12 @@
     [leftViewController willMoveToParentViewController:nil];
     [leftViewController removeFromParentViewController];
     _leftViewController = leftViewController;
-    [self.leftUnderlayView addSubview:leftViewController.view];
-    [self.view addSubview:self.leftUnderlayView];
-    [self.view sendSubviewToBack:self.leftUnderlayView];
+    [self.backgroundView addSubview:leftViewController.view];
     [self addChildViewController:leftViewController];
     [leftViewController didMoveToParentViewController:self];
     
     // Adjust the frame
-    CGRect frame = CGRectMake(0.0f, self.topViewOffsetY, self.peakAmount, CGRectGetHeight(self.leftUnderlayView.bounds) - self.topViewOffsetY);
+    CGRect frame = CGRectMake(0.0f, self.topViewOffsetY, self.peakAmount, CGRectGetHeight(self.backgroundView.bounds) - self.topViewOffsetY);
     leftViewController.view.frame = CGRectIntegral(frame);
     leftViewController.view.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleBottomMargin | UIViewAutoresizingFlexibleHeight;
 }
@@ -311,10 +318,11 @@
     [topViewController.view removeFromSuperview];
     [topViewController willMoveToParentViewController:nil];
     [topViewController removeFromParentViewController];
+    [self removeTopBackgroundView];
     _topViewController = topViewController;
-    [self.topUnderlayView addSubview:topViewController.view];
-    [self.view addSubview:self.topUnderlayView];
-    [self.view bringSubviewToFront:self.topUnderlayView];
+    [self.topBackgroundView addSubview:topViewController.view];
+    [self.view addSubview:self.topBackgroundView];
+    [self.view bringSubviewToFront:self.topBackgroundView];
     [self addChildViewController:topViewController];
     [topViewController didMoveToParentViewController:self];
     
@@ -323,8 +331,8 @@
     topViewController.view.layer.cornerRadius = self.cornerRadius;
     
     // Adjust the frame
-    topViewController.view.frame = CGRectIntegral(self.topUnderlayView.bounds);
-    topViewController.view.autoresizingMask = self.topUnderlayView.autoresizingMask;
+    topViewController.view.frame = CGRectIntegral(self.topBackgroundView.bounds);
+    topViewController.view.autoresizingMask = self.topBackgroundView.autoresizingMask;
 }
 
 #pragma mark -
@@ -360,8 +368,8 @@
                               delay:self.animationDelay
                             options:UIViewAnimationOptionCurveEaseInOut  | UIViewAnimationOptionBeginFromCurrentState
                          animations:^{
-                             // Adjust the top underlay view frame
-                             self.topUnderlayView.frame = CGRectIntegral(CGRectOffset(rect, self.peakAmount, 0.0f));
+                             // Adjust the top background view frame
+                             self.topBackgroundView.frame = CGRectIntegral(CGRectOffset(rect, self.peakAmount, 0.0f));
                          }
                          completion:^(BOOL finished) {
                              if (finished) {
@@ -379,8 +387,8 @@
                          }];
     }
     else {
-        // Adjust the top underlay view frame
-        self.topUnderlayView.frame = CGRectIntegral(CGRectOffset(rect, self.peakAmount, 0.0f));
+        // Adjust the top background view frame
+        self.topBackgroundView.frame = CGRectIntegral(CGRectOffset(rect, self.peakAmount, 0.0f));
         
         // Update the view state
         [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
@@ -409,8 +417,8 @@
                               delay:self.animationDelay
                             options:UIViewAnimationOptionCurveEaseInOut  | UIViewAnimationOptionBeginFromCurrentState
                          animations:^{
-                             // Adjust the top underlay view frame
-                             self.topUnderlayView.frame = CGRectIntegral(rect);
+                             // Adjust the top background view frame
+                             self.topBackgroundView.frame = CGRectIntegral(rect);
                          }
                          completion:^(BOOL finished) {
                              if (finished) {
@@ -424,8 +432,8 @@
                          }];
     }
     else {
-        // Adjust the top underlay view frame
-        self.topUnderlayView.frame = CGRectIntegral(rect);
+        // Adjust the top background view frame
+        self.topBackgroundView.frame = CGRectIntegral(rect);
         
         // Update the view state
         [_previousViewStates addObject:[NSNumber numberWithInt:self.viewState]];
@@ -520,7 +528,7 @@
         
         // If the swipe was to the right
         if (velocity.x > 0) {
-            if (self.topUnderlayView.frame.origin.x <= self.peakThreshold) {
+            if (gestureRecognizer.view.frame.origin.x <= self.peakThreshold) {
                 [self hideLeftAnimated:YES];
             }
             else {
@@ -529,7 +537,7 @@
         }
         // else is must have been to the left
         else {
-            if (self.topUnderlayView.frame.origin.x >= self.peakThreshold) {
+            if (gestureRecognizer.view.frame.origin.x >= self.peakThreshold) {
                 [self showLeftAnimated:YES];
             } else {
                 [self hideLeftAnimated:YES];

@@ -23,12 +23,6 @@
     slidingViewController.topViewController = [[UINavigationController alloc] initWithRootViewController:topViewController];
     self.window.rootViewController = slidingViewController;
     
-    double delayInSeconds = 2.0;
-    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSeconds * NSEC_PER_SEC));
-    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-        slidingViewController.peakAmount = 200.0f;
-    });
-    
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
     
     self.window.backgroundColor = [UIColor whiteColor];
