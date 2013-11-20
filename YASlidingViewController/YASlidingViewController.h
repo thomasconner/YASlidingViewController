@@ -10,21 +10,26 @@
 
 typedef enum SlidingViewState : NSInteger SlidingViewState;
 enum SlidingViewState : NSInteger {
-    SlidingViewStateDragging = 0,
-    SlidingViewStateOpened = 1,
-    SlidingViewStateClosed = 2,
-    SlidingViewStateLocked = 3
+    SlidingViewStateLeftDragging = 0,
+    SlidingViewStateLeftOpened = 1,
+    SlidingViewStateLeftLocked = 2,
+    SlidingViewStateRightDragging = 3,
+    SlidingViewStateRightOpened = 4,
+    SlidingViewStateRightLocked = 5,
+    SlidingViewStateClosed = 6
 };
 
 @interface YASlidingViewController : UIViewController {
 @private
     NSMutableArray *_previousViewStates;
     BOOL _viewAppeared;
+    CGPoint _lastOrigin;
 }
 
 // View Controllers
 @property (nonatomic, strong) UIViewController *leftViewController;
 @property (nonatomic, strong) UIViewController *topViewController;
+@property (nonatomic, strong) UIViewController *rightViewController;
 
 // Settings
 @property (nonatomic) BOOL allowOverswipe;
@@ -47,5 +52,8 @@ enum SlidingViewState : NSInteger {
 - (void)toggleLeftAnimated:(BOOL)animated;
 - (void)showLeftAnimated:(BOOL)animated;
 - (void)hideLeftAnimated:(BOOL)animated;
+- (void)toggleRightAnimated:(BOOL)animated;
+- (void)showRightAnimated:(BOOL)animated;
+- (void)hideRightAnimated:(BOOL)animated;
 
 @end

@@ -1,27 +1,38 @@
 //
-//  TopViewController.m
+//  RightViewController.m
 //  YASlidingViewControllerDemo
 //
-//  Created by Thomas Conner on 11/8/13.
+//  Created by Thomas Conner on 11/20/13.
 //  Copyright (c) 2013 Conner Development. All rights reserved.
 //
 
-#import "TopViewController.h"
-#import "UIViewController+SlidingView.h"
-#import "LeftViewController.h"
+#import "RightViewController.h"
 
-@interface TopViewController ()
+@interface RightViewController ()
 
 @end
 
-@implementation TopViewController
+@implementation RightViewController
 
-- (id)initWithStyle:(UITableViewStyle)style {
-    self = [super initWithStyle:style];
+- (id)init {
+    self = [super init];
     if (self) {
-        self.title = @"Top View Controller";
+        // Custom initialization
     }
     return self;
+}
+
+- (void)viewDidLoad
+{
+    [super viewDidLoad];
+    
+    self.view.backgroundColor = [UIColor blackColor];
+}
+
+- (void)didReceiveMemoryWarning
+{
+    [super didReceiveMemoryWarning];
+    // Dispose of any resources that can be recreated.
 }
 
 #pragma mark - Table view data source
@@ -45,15 +56,9 @@
     }
     
     cell.textLabel.text = [NSString stringWithFormat:@"Cell %ld", indexPath.row];
-    cell.selectionStyle = UITableViewCellSelectionStyleBlue;
-    cell.accessoryType = UITableViewCellAccessoryDisclosureIndicator;
+    cell.selectionStyle = UITableViewCellSelectionStyleNone;
     
     return cell;
-}
-
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    LeftViewController *leftViewController = [LeftViewController new];
-    [self.navigationController pushViewController:leftViewController animated:YES];
 }
 
 @end

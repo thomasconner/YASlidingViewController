@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		E9441132183CFCD80087D9C2 /* RightViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = E9441131183CFCD80087D9C2 /* RightViewController.m */; };
 		E98C6F42182BF2F40003D22F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E98C6F41182BF2F40003D22F /* Foundation.framework */; };
 		E98C6F44182BF2F40003D22F /* CoreGraphics.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E98C6F43182BF2F40003D22F /* CoreGraphics.framework */; };
 		E98C6F46182BF2F40003D22F /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E98C6F45182BF2F40003D22F /* UIKit.framework */; };
@@ -37,6 +38,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		E9441130183CFCD80087D9C2 /* RightViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RightViewController.h; sourceTree = "<group>"; };
+		E9441131183CFCD80087D9C2 /* RightViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RightViewController.m; sourceTree = "<group>"; };
 		E98C6F3E182BF2F40003D22F /* YASlidingViewControllerDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = YASlidingViewControllerDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		E98C6F41182BF2F40003D22F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
 		E98C6F43182BF2F40003D22F /* CoreGraphics.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreGraphics.framework; path = System/Library/Frameworks/CoreGraphics.framework; sourceTree = SDKROOT; };
@@ -132,6 +135,8 @@
 				E9EB71EC182D184100985C88 /* TopViewController.m */,
 				E9EB71EE182D185400985C88 /* LeftViewController.h */,
 				E9EB71EF182D185400985C88 /* LeftViewController.m */,
+				E9441130183CFCD80087D9C2 /* RightViewController.h */,
+				E9441131183CFCD80087D9C2 /* RightViewController.m */,
 			);
 			path = YASlidingViewControllerDemo;
 			sourceTree = "<group>";
@@ -272,6 +277,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E9441132183CFCD80087D9C2 /* RightViewController.m in Sources */,
 				E9EB71ED182D184100985C88 /* TopViewController.m in Sources */,
 				E98C6F52182BF2F40003D22F /* AppDelegate.m in Sources */,
 				E98C6F4E182BF2F40003D22F /* main.m in Sources */,

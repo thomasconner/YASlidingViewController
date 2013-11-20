@@ -10,6 +10,7 @@
 #import "YASlidingViewController.h"
 #import "TopViewController.h"
 #import "LeftViewController.h"
+#import "RightViewController.h"
 
 @implementation AppDelegate
 
@@ -21,6 +22,7 @@
     slidingViewController.leftViewController = [LeftViewController new];
     TopViewController *topViewController = [[TopViewController alloc] initWithStyle:UITableViewStylePlain];
     slidingViewController.topViewController = [[UINavigationController alloc] initWithRootViewController:topViewController];
+    slidingViewController.rightViewController = [RightViewController new];
     self.window.rootViewController = slidingViewController;
     
     [[UIApplication sharedApplication] setStatusBarStyle:UIStatusBarStyleLightContent];
